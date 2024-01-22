@@ -5,4 +5,4 @@ ADD . /actions
 WORKDIR /actions
 
 # Code file to execute when the docker container starts up (`entrypoint.sh`)
-ENTRYPOINT ["pytest", "/actions/tests"]
+ENTRYPOINT ["pytest", "-s", "-o", "log_cli=true", "/actions/tests"]

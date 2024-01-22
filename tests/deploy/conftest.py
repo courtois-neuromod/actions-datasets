@@ -35,7 +35,7 @@ def setup_git(
 def dataset(setup_git):
     ds = install(f"git@github.com:{os.environ['GITHUB_REPOSITORY']}.git")
     ds.repo.fetch('origin', os.environ['GITHUB_REF'])
-    commitish = GIT_ANNEX_TEST_BRANCH if os.environ['GITHUB_REF_NAME'] == 'git-annex' else os.environ['GITHUB_SHA']
+    commitish = GIT_ANNEX_TEST_BRANCH if 'git-annex' in os.environ['GITHUB_REF_NAME'] else os.environ['GITHUB_SHA']
     logger.info(f"checking out {commitish}")
     ds.repo.checkout(commitish)
     yield ds
