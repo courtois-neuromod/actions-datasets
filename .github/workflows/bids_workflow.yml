@@ -1,0 +1,68 @@
+# Workflow for raw or derivative BIDS repos
+# checks BIDS compliance and runs deploy tests
+name: 'BIDS dataset workflow'
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: 'Name that will appear in the commit'
+        type: string
+        required: true
+        default: 'CNeuromod Bot'
+      email:
+        description: 'Email that will appear in the commit'
+        type: string
+        required: true
+        default: 'courtois.neuromod@gmail.com'
+    secrets:
+      ssh_key: # for ssh install
+        required: true
+      git_token: # for https install of private repos
+        required: false
+      s3_access_key: # for s3 fsck
+        required: false
+      s3_secret_key:
+        required: false
+
+jobs:
+  bids-validator:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    env:
+      VALIDATOR_IMAGE: ghcr.io/courtois-neuromod/bids-validator:main
+      VALIDATOR_OPTIONS: --ignoreNiftiHeaders # ignores to work on datalad repos without getting files
+      VALIDATOR_CONFIG: |
+        {
+          "ignore": [
+            {"code": "TSV_COLUMN_MISSING", "location": "**_scans.tsv"},
+            {"code": "TSV_ADDITIONAL_COLUMNS_UNDEFINED", "location": "**_scans.tsv"},
+            {"code": "TSV_COLUMN_MISSING", "location": "**_events.tsv"},
+            {"code": "SCANS_FILENAME_NOT_MATCH_DATASET"}
+          ]
+        }
+      TMP_CONFIG_PATH: /tmp/bids-validator_config.json
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - name: json-yaml-validate
+        id: json-yaml-validate
+        uses: GrantBirki/json-yaml-validate@v3.2.1
+
+      # Runs a single command using the runners shell
+      - name: bids-validator
+        run: |
+          echo "${VALIDATOR_CONFIG}" > ${TMP_CONFIG_PATH}
+          docker run -v $TMP_CONFIG_PATH:$TMP_CONFIG_PATH -v ${GITHUB_WORKSPACE}:/bids ${VALIDATOR_IMAGE} -c ${TMP_CONFIG_PATH} ${VALIDATOR_OPTIONS} /bids
+
+
+  deploy_linux:
+    uses: courtois-neuromod/actions-datasets/.github/workflows/standard_workflow.yml@main
+    with:
+      name: CNeuromod Bot
+      email: courtois.neuromod@gmail.com
+    secrets:
+      ssh_key: ${{ secrets.ssh_key }}
+      s3_access_key: ${{ secrets.s3_access_key }}
+      s3_secret_key: ${{ secrets.s3_secret_key }}

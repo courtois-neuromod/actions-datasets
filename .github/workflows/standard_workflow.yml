@@ -1,0 +1,45 @@
+name: 'Datalad deploy test'
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: 'Name that will appear in the commit'
+        type: string
+        required: true
+        default: 'CNeuromod Bot'
+      email:
+        description: 'Email that will appear in the commit'
+        type: string
+        required: true
+        default: 'courtois.neuromod@gmail.com'
+    secrets:
+      ssh_key:
+        required: true
+      git_token:
+        required: false
+      s3_access_key:
+        required: false
+      s3_secret_key:
+        required: false
+jobs:
+  deploy_in_container:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/courtois-neuromod/dataset-tests:main
+      env:
+        SECRET_KEY: ${{ secrets.ssh_key }}
+        GIT_USERNAME: ${{ inputs.name }}
+        GIT_EMAIL: ${{ inputs.email }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.s3_access_key }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.s3_secret_key }}
+        GIT_TOKEN: ${{ secrets.git_token }}
+    steps:
+      - name: debug
+        run: env
+      - name: "setup gh ssh"
+        run: |
+          mkdir -p /root/.ssh/
+          ssh-keyscan -H github.com | install -m 600 /dev/stdin /root/.ssh/known_hosts
+      - name: "Test deploy"
+        run: |
+          pytest --log-cli-level=WARNING /actions/tests
