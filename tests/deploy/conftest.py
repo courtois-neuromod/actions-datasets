@@ -1,4 +1,5 @@
 import os
+import tempfile
 import subprocess
 import platform
 import pytest
@@ -49,7 +50,8 @@ def install_ds(protocol='ssh'):
         if 'GIT_TOKEN' in os.environ:
             username_token = f"{os.environ['GIT_TOKEN']}@"
         url = f"https://{username_token}github.com/{os.environ['GITHUB_REPOSITORY']}.git"
-    ds = install(path=f"ds_{protocol}", source=url)
+    dest = tempfile.TemporaryDirectory(prefix=f"ds_{protocol}")
+    ds = install(path=dest.name, source=url)
     if 'git-annex' in os.environ['GITHUB_HEAD_REF']:
         ds.repo.fetch('origin', GIT_ANNEX_TEST_BRANCH)
         logger.info(f"testing git-annex branch changes: checking out {GIT_ANNEX_TEST_BRANCH}")
