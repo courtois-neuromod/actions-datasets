@@ -22,7 +22,7 @@ on:
       s3_secret_key:
         required: false
 jobs:
-  deploy_in_container:
+  deploy_on_linux:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/courtois-neuromod/dataset-tests:main
@@ -43,3 +43,34 @@ jobs:
       - name: "Test deploy"
         run: |
           pytest --log-cli-level=WARNING /actions/tests
+
+  deploy_on_windows:
+    runs-on: windows-latest
+    needs: deploy_on_linux # only run if tests pass on linux
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.ssh_key }}
+      GIT_USERNAME: ${{ inputs.name }}
+      GIT_EMAIL: ${{ inputs.email }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.s3_access_key }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.s3_secret_key }}
+      GIT_TOKEN: ${{ secrets.git_token }}
+    steps:
+      - name: setup python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: 3.11
+      - name: setup datalad
+        run: |
+          python -m pip install datalad-installer
+          datalad-installer git-annex -m datalad/git-annex:release
+          git config --global filter.annex.process "git-annex filter-process"
+          python -m pip install datalad pytest pytest-order ssh_agent_setup
+      - name: "Test deploy"
+        shell: bash
+        run: |
+          mkdir -p $HOME/.ssh
+          ssh-keyscan -H -t rsa ${GITHUB_SERVER_URL##https://} >> $HOME/.ssh/known_hosts
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+          git config --global datalad.ssh.identityfile ~/.ssh/id_rsa
+          git clone https://github.com/courtois-neuromod/actions-datasets.git /tmp/actions
+          pytest -v --full-trace --log-cli-level=WARNING /tmp/actions/tests/deploy
