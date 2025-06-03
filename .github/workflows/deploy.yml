@@ -42,7 +42,7 @@ jobs:
           ssh-keyscan -H github.com | install -m 600 /dev/stdin /root/.ssh/known_hosts
       - name: "Test deploy"
         run: |
-          pytest --log-cli-level=WARNING /actions/tests
+          pytest --log-cli-level=INFO /actions/tests
 
   deploy_on_windows:
     runs-on: windows-latest
@@ -73,4 +73,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
           git config --global datalad.ssh.identityfile ~/.ssh/id_rsa
           git clone https://github.com/courtois-neuromod/actions-datasets.git /tmp/actions
-          pytest -v --full-trace --log-cli-level=WARNING /tmp/actions/tests/deploy
+          pytest -v --full-trace --log-cli-level=INFO /tmp/actions/tests/deploy
