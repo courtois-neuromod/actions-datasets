@@ -36,7 +36,8 @@ def test_files_in_remote(dataset):
 
     # check that shared files are listed on the share remote
     for public_sibling in public_siblings:
-        logger.info(f"⏳️ checking file availability in {public_sibling}")
+        logger.info(f"⏳️ checking file availability in {public_sibling['name']}")
+        logger.debug(public_sibling['name'])
         sibling_wanted = public_sibling.get('annex-wanted')
         if sibling_wanted == 'groupwanted':
             sibling_group = ds_repo.call_annex_oneline(['group', public_sibling['name']])
@@ -47,6 +48,11 @@ def test_files_in_remote(dataset):
             'find', '--not', '--metadata', 'distribution-restrictions=*',
             '--not', '--in',  public_sibling['name']] + wanted_opts))
         assert len(shared_files_missing) == 0, f"💥 Files missing in shared remote { public_sibling['name']}: \n{shared_files_missing}"
+
+        if public_sibling['annex-type'] == 's3' and not public_sibling.get("annex-public",None)=="yes":
+            assert len(os.environ.get('AWS_ACCESS_KEY_ID')) > 0, "	🗝️ missing AWS_ACCESS_KEY_ID"
+            assert len(os.environ.get('AWS_SECRET_ACCESS_KEY')) > 0, "	🗝️ missing AWS_SECRET_ACCESS_KEY"
+
 
         # check all files are in the shared remote
         fsck_res = ds_repo.fsck(remote=public_sibling['name'], fast=True)
