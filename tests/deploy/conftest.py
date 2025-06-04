@@ -6,6 +6,7 @@ import pytest
 import ssh_agent_setup
 from datalad.api import install
 from datalad.config import ConfigManager
+from datalad.log import no_progress
 
 GIT_ANNEX_TEST_BRANCH='dev'
 
@@ -51,13 +52,16 @@ def install_ds(protocol='ssh'):
             username_token = f"{os.environ['GIT_TOKEN']}@"
         url = f"https://{username_token}github.com/{os.environ['GITHUB_REPOSITORY']}.git"
     dest = tempfile.TemporaryDirectory(prefix=f"ds_{protocol}")
-    ds = install(path=dest.name, source=url)
+    with no_progress():
+        ds = install(path=dest.name, source=url)
     if 'git-annex' in os.environ['GITHUB_HEAD_REF']:
-        ds.repo.fetch('origin', GIT_ANNEX_TEST_BRANCH)
+        with no_progress():
+            ds.repo.fetch('origin', GIT_ANNEX_TEST_BRANCH)
         logger.info(f"testing git-annex branch changes: checking out {GIT_ANNEX_TEST_BRANCH}")
         ds.repo.checkout(GIT_ANNEX_TEST_BRANCH)
     else:
-        ds.repo.fetch('origin', os.environ['GITHUB_SHA'])
+        with no_progress():
+            ds.repo.fetch('origin', os.environ['GITHUB_SHA'])
         ref_name = os.environ['GITHUB_REF'].replace('refs/','')
         logger.info(f"checking out {ref_name}")
         ds.repo.checkout(os.environ['GITHUB_SHA'])
