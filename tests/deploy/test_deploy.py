@@ -53,6 +53,12 @@ def test_files_in_remote(dataset):
             assert len(os.environ.get('AWS_ACCESS_KEY_ID')) > 0, "	🗝️ missing AWS_ACCESS_KEY_ID"
             assert len(os.environ.get('AWS_SECRET_ACCESS_KEY')) > 0, "	🗝️ missing AWS_SECRET_ACCESS_KEY"
 
+        # check for 30sec
+        quick_fsck_res = ds_repo.fsck(remote=public_sibling['name'], fast=True, annex_options=["--time-limit=10s"])
+        quick_fsck_fails = [fr for fr in quick_fsck_res if not fr['success']]
+        quick_fsck_num_fail = len(quick_fsck_fails)
+        assert quick_fsck_num_fail == 0, f"💥 git-annex quick fsck on {public_sibling['name']} failed example error:{quick_fsck_fails[0]}"
+
 
         # check all files are in the shared remote
         fsck_res = ds_repo.fsck(remote=public_sibling['name'], fast=True)
@@ -60,7 +66,7 @@ def test_files_in_remote(dataset):
         fsck_fails = [fr for fr in fsck_res if not fr['success']]
         fsck_fail_files = [fr['file'] for fr in fsck_fails]
         fsck_num_fail = len(fsck_fails)
-        assert fsck_num_fail == 0, f"💥 git-annex fsck on {public_sibling['name']} failed example error:{fsck_fails[0]} for files: {fsck_fail_files}, "
+        assert fsck_num_fail == 0, f"💥 git-annex fsck on {public_sibling['name']} failed example error:{fsck_fails[0]} for files: {fsck_fail_files}"
 
         # check that sensitive files are not in the shared remote
         sensitive_files_shared = list(ds_repo.call_annex_items_([
