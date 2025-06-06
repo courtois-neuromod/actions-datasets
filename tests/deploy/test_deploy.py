@@ -78,8 +78,11 @@ def test_files_in_remote(dataset):
 def get_public_siblings(dataset):
     siblings = dataset.siblings()
     public_siblings = [sib for sib in siblings if not sib.get('annex-ignore', False) and sib['name']!='here']
-    #sibling_names = [sib['name'] for sib in public_siblings]
+    sibling_names = [sib['name'] for sib in public_siblings]
     #mri_siblings = [sn for sn in sibling_names if sn.split('.')[-1] == 'mri']
     if len(dataset.repo.get_annexed_files()) > 0:
         assert len(public_siblings) > 0 , '❓️at least 1 public remote is required'
+    sib_list = os.environ.get("PUBLIC_SIBLINGS", "").split()
+    for sib in sib_list:
+        assert sib in sibling_names, "public remote {sib} not configured"
     return public_siblings
