@@ -84,5 +84,5 @@ def get_public_siblings(dataset):
         assert len(public_siblings) > 0 , '❓️at least 1 public remote is required'
     sib_list = os.environ.get("PUBLIC_SIBLINGS", "").split()
     for sib in sib_list:
-        assert sib in sibling_names, "public remote {sib} not configured"
+        assert sib in sibling_names, f"public remote {sib} not configured"
     return public_siblings

@@ -38,6 +38,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.s3_secret_key }}
         GIT_TOKEN: ${{ secrets.git_token }}
         PUBLIC_SIBLINGS: ${{ inputs.public_siblings }}
+        DATALAD_LOG_LEVEL: WARN
     steps:
       - name: debug
         run: env
@@ -59,6 +60,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.s3_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.s3_secret_key }}
       GIT_TOKEN: ${{ secrets.git_token }}
+      DATALAD_LOG_LEVEL: WARN
     steps:
       - name: setup python
         uses: actions/setup-python@v5.4.0
