@@ -61,6 +61,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.s3_secret_key }}
       GIT_TOKEN: ${{ secrets.git_token }}
       DATALAD_LOG_LEVEL: WARN
+    timeout-minutes: 15
     steps:
       - name: setup python
         uses: actions/setup-python@v5.4.0
