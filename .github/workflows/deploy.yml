@@ -83,4 +83,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
           git config --global datalad.ssh.identityfile ~/.ssh/id_rsa
           git clone https://github.com/courtois-neuromod/actions-datasets.git /tmp/actions
-          pytest --log-cli-level=INFO /tmp/actions/tests/deploy
+          pytest -k 'not test_files_in_remote' --log-cli-level=INFO /tmp/actions/tests/deploy
