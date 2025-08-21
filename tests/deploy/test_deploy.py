@@ -49,7 +49,7 @@ def test_files_in_remote(dataset):
             '--not', '--in',  public_sibling['name']] + wanted_opts))
         assert len(shared_files_missing) == 0, f"💥 Files missing in shared remote { public_sibling['name']}: \n{shared_files_missing}"
 
-        if public_sibling['annex-type'] == 's3' and not public_sibling.get("annex-public",None)=="yes":
+        if public_sibling.get('annex-type') == 's3' and not public_sibling.get("annex-public",None)=="yes":
             assert len(os.environ.get('AWS_ACCESS_KEY_ID')) > 0, "	🗝️ missing AWS_ACCESS_KEY_ID"
             assert len(os.environ.get('AWS_SECRET_ACCESS_KEY')) > 0, "	🗝️ missing AWS_SECRET_ACCESS_KEY"
 
