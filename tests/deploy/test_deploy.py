@@ -68,6 +68,20 @@ def test_files_in_remote(dataset):
         fsck_num_fail = len(fsck_fails)
         assert fsck_num_fail == 0, f"💥 git-annex fsck on {public_sibling['name']} failed example error:{fsck_fails[0]} for files: {fsck_fail_files}"
 
+        # check that unwanted files are not shared (after fscking)
+        unwanted_shared_files = list(ds_repo.call_annex_items_([
+            'find', '--format', '${file}\\t${key}\\n', '--not', '--want-get-by',  public_sibling['name'],
+            '--in',  public_sibling['name']]))
+        if len(unwanted_shared_files):
+            # we need to check for each files that it's not a key used by different paths/subjects
+            for f in unwanted_shared_files:
+                file, key = f.split('\t')
+                used_where = list(ds_repo.call_annex_items_(['whereused', '--key', key]))
+                if len(used_where) < 2:
+                    raise AssertionError(f"{file} is unwanted on remote {public_sibling['name']}")
+                else:
+                    logger.warning(f"{file} is unwanted on remote {public_sibling['name']} but used by multiple paths")
+
         # check that sensitive files are not in the shared remote
         sensitive_files_shared = list(ds_repo.call_annex_items_([
             'find', '--metadata', 'distribution-restrictions=*',
