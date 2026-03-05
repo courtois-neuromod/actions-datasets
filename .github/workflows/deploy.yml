@@ -18,7 +18,7 @@ on:
         required: false
     secrets:
       ssh_key:
-        required: true
+        required: false
       git_token:
         required: false
       s3_access_key:

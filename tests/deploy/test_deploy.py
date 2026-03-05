@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 def test_get_submodules_https_parent(dataset_https):
     dataset_https.get('.', recursive=True, recursion_limit=1, get_data=False)
 
+@pytest.mark.skipif(os.environ.get('SSH_KEY') is None, reason="testing with https cloning only")
 def test_get_submodules(dataset):
     dataset.get('.', recursive=True, recursion_limit=1, get_data=False)
 
@@ -27,7 +28,7 @@ def test_autoenable(dataset):
     ora_siblings_names = list(sib['name'] for sib in ora_siblings)
     assert len(ora_siblings) == 0, f"💣 ORA remotes {','.join(ora_siblings_names)} are autoenabled"
 
-def test_files_in_remote(dataset):
+def test_files_in_remote(dataset_https):
     ds_repo = dataset.repo
 
     public_siblings = get_public_siblings(dataset)
