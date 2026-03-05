@@ -42,7 +42,10 @@ def setup_ssh():
 
 @pytest.fixture(scope="session")
 def dataset(setup_git, setup_ssh):
-    yield from install_ds(protocol='ssh')
+    protocol='ssh'
+    if os.environ.get('SSH_KEY') is None:
+        protocol='https'
+    yield from install_ds(protocol=protocol)
 
 def install_ds(protocol='ssh'):
     url = f"git@github.com:{os.environ['GITHUB_REPOSITORY']}.git"

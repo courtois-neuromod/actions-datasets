@@ -28,7 +28,7 @@ def test_autoenable(dataset):
     ora_siblings_names = list(sib['name'] for sib in ora_siblings)
     assert len(ora_siblings) == 0, f"💣 ORA remotes {','.join(ora_siblings_names)} are autoenabled"
 
-def test_files_in_remote(dataset_https):
+def test_files_in_remote(dataset):
     ds_repo = dataset.repo
 
     public_siblings = get_public_siblings(dataset)
