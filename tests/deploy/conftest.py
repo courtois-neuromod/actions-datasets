@@ -41,10 +41,12 @@ def setup_ssh():
 
 
 @pytest.fixture(scope="session")
-def dataset(setup_git, setup_ssh):
+def dataset(setup_git):
     protocol='ssh'
     if os.environ.get('SSH_KEY') is None:
         protocol='https'
+    else:
+        setup_ssh()
     yield from install_ds(protocol=protocol)
 
 def install_ds(protocol='ssh'):
