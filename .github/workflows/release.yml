@@ -1,0 +1,51 @@
+name: 'Release workflow'
+# to be called with:
+#on:
+#  release:
+#    types: [published]
+on:
+  workflow_call:
+    inputs:
+      recursion_limit:
+        description: 'recusion depth of the dataset that we want to release'
+        type: int
+        default: 0
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      ZENODO_TOKEN:
+        required: true
+
+jobs:
+  upload-to-zenodo:
+    runs-on: ubuntu-latest
+    name: Update metadata and push a release to Zenodo
+
+    steps:
+      - name: Set up datalad
+        run: |
+          python -m pip install datalad-installer
+          datalad-installer git-annex -m datalad/git-annex:release
+          python -m pip install datalad
+      - name: Install dataset
+        run: |
+          datalad install -s
+
+      - name: Upload to Zenodo
+        id: release
+        uses: megasanjay/upload-to-zenodo@v2.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          zenodo_token: ${{ secrets.ZENODO_TOKEN }}
+          zenodo_deposition_id: SOME_DEPOSITION_ID
+          zenodo_publish: true
+          zenodo_sandbox: true
+          commit_message: 'chore: update ${file_name} for Zenodo release'
+          update_metadata_files: true
+          codemeta_json: true
+          citation_cff: true
+          zenodo_json: true
+
+      # Get the doi from the `release` step
+      - name: Get the output doi
+        run: echo "The released doi was ${{ steps.release.outputs.doi }}"
