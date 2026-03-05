@@ -49,9 +49,8 @@ def test_files_in_remote(dataset, subtests):
         return
     public_siblings = get_public_siblings(dataset)
     for public_sibling in public_siblings:
-        with subtests.test(f"sibling {public_sibling}"):
+        with subtests.test(f"⏳️ checking file availability in {public_sibling['name']}", public_sibling=public_sibling):
             # check that shared files are listed on the share remote
-            logger.info(f"⏳️ checking file availability in {public_sibling['name']}")
             logger.debug(public_sibling['name'])
             sibling_wanted = public_sibling.get('annex-wanted')
             if sibling_wanted == 'groupwanted':
@@ -83,19 +82,20 @@ def test_files_in_remote(dataset, subtests):
             fsck_num_fail = len(fsck_fails)
             assert fsck_num_fail == 0, f"💥 git-annex fsck on {public_sibling['name']} failed example error:{fsck_fails[0]} for files: {fsck_fail_files}"
 
-            # check that unwanted files are not shared (after fscking)
-            unwanted_shared_files = list(ds_repo.call_annex_items_([
-                'find', '--format', '${file}\\t${key}\\n', '--not', '--want-get-by',  public_sibling['name'],
-                '--in',  public_sibling['name']]))
-            if len(unwanted_shared_files):
-                # we need to check for each files that it's not a key used by different paths/subjects
-                for f in unwanted_shared_files:
-                    file, key = f.split('\t')
-                    used_where = list(ds_repo.call_annex_items_(['whereused', '--key', key]))
-                    if len(used_where) < 2:
-                        raise AssertionError(f"{file} is unwanted on remote {public_sibling['name']}")
-                    else:
-                        logger.warning(f"{file} is unwanted on remote {public_sibling['name']} but used by multiple paths")
+            if len(wanted_opts):
+                # check that unwanted files are not shared (after fscking)
+                unwanted_shared_files = list(ds_repo.call_annex_items_([
+                    'find', '--format', '${file}\\t${key}\\n', '--not', '--want-get-by',  public_sibling['name'],
+                    '--in',  public_sibling['name']]))
+                if len(unwanted_shared_files):
+                    # we need to check for each files that it's not a key used by different paths/subjects
+                    for f in unwanted_shared_files:
+                        file, key = f.split('\t')
+                        used_where = list(ds_repo.call_annex_items_(['whereused', '--key', key]))
+                        if len(used_where) < 2:
+                            raise AssertionError(f"{file} is unwanted on remote {public_sibling['name']}")
+                        else:
+                            logger.warning(f"{file} is unwanted on remote {public_sibling['name']} but used by multiple paths")
 
             # check that sensitive files are not in the shared remote
             sensitive_files_shared = list(ds_repo.call_annex_items_([
