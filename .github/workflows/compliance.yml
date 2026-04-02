@@ -17,11 +17,13 @@ jobs:
             {"code": "TSV_COLUMN_MISSING", "location": "**_scans.tsv"},
             {"code": "TSV_ADDITIONAL_COLUMNS_UNDEFINED", "location": "**_scans.tsv"},
             {"code": "TSV_COLUMN_MISSING", "location": "**_events.tsv"},
-            {"code": "SCANS_FILENAME_NOT_MATCH_DATASET"}
+            {"code": "SCANS_FILENAME_NOT_MATCH_DATASET"},
+            {"code": "INVALID_GZIP"}
           ],
           "warning": [
             {"code": "SIDECAR_KEY_REQUIRED", "subCode": "Units"},
-            {"code": "REPETITION_TIME_AND_ACQUISITION_DURATION_MUTUALLY_EXCLUSIVE"}
+            {"code": "REPETITION_TIME_AND_ACQUISITION_DURATION_MUTUALLY_EXCLUSIVE"},
+            {"code": "STIMULUS_FILE_MISSING"}
           ]
         }
       TMP_CONFIG_PATH: /tmp/bids-validator_config.json
