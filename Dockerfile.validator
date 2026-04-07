@@ -1,6 +1,4 @@
-FROM denoland/deno:alpine-2.1.7
-#RUN deno install -Agf -n bids-validator jsr:@bids/validator@2.0.1
-# build on main while waiting for the release to use wildcards in config
-RUN deno install -Agf -n bids-validator https://github.com/bids-standard/bids-validator/raw/refs/heads/deno-build/bids-validator.js
+FROM denoland/deno:alpine-2.7.11
+RUN deno install -Agf -n bids-validator jsr:@bids/validator@2.4.1
 
 ENTRYPOINT ["bids-validator"]
