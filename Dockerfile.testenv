@@ -3,8 +3,9 @@ FROM ghcr.io/courtois-neuromod/datalad:main
 
 ADD . /actions
 WORKDIR /work
-RUN source /opt/venv/bin/activate && python -m pip install --no-cache-dir pytest-order
+RUN source /opt/venv/bin/activate && python -m pip install --no-cache-dir pytest-order pytest-subtests
 
 ENV PATH=/opt/venv/bin/:$PATH
+
 
 ENTRYPOINT ["pytest", "-s", "--log-cli-level", "WARN", "/actions/tests"]
