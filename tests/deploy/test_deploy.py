@@ -48,6 +48,10 @@ def test_files_in_remote(dataset, subtests):
     if not isinstance(ds_repo, datalad.support.annexrepo.AnnexRepo):
         return
     public_siblings = get_public_siblings(dataset)
+    # A dataset with an empty annex (eg. a superdataset that only tracks
+    # submodules) has nothing to fsck, so an empty fsck result is expected
+    # there rather than a sign of a missing remote.
+    has_annexed_files = len(ds_repo.get_annexed_files()) > 0
     for public_sibling in public_siblings:
         with subtests.test(f"⏳️ checking file availability in {public_sibling['name']}", public_sibling=public_sibling):
             # check that shared files are listed on the share remote
@@ -76,7 +80,8 @@ def test_files_in_remote(dataset, subtests):
 
             # check all files are in the shared remote
             fsck_res = ds_repo.fsck(remote=public_sibling['name'], fast=True)
-            assert len(fsck_res) > 0, f"❓️git-annex fsck did not give any result, check that remote exists"
+            if has_annexed_files:
+                assert len(fsck_res) > 0, f"❓️git-annex fsck did not give any result, check that remote exists"
             fsck_fails = [fr for fr in fsck_res if not fr['success']]
             fsck_fail_files = [fr['file'] for fr in fsck_fails]
             fsck_num_fail = len(fsck_fails)
