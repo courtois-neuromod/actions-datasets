@@ -16,6 +16,11 @@ on:
         description: 'List of siblings that should exists and be autoenabled'
         type: string
         required: false
+      skip_windows:
+        description: 'Set to true to skip deploy tests on windows'
+        required: true
+        type: boolean
+        default: false
     secrets:
       ssh_key:
         required: false
@@ -53,6 +58,7 @@ jobs:
   deploy_on_windows:
     runs-on: windows-latest
     needs: deploy_on_linux # only run if tests pass on linux
+    if: ${{ inputs.skip_windows == false }}
     env:
       SSH_PRIVATE_KEY: ${{ secrets.ssh_key }}
       GIT_USERNAME: ${{ inputs.name }}
